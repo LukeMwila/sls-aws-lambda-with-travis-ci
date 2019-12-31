@@ -1,0 +1,84 @@
+language: node_js
+node_js:
+  - "10"
+
+deploy_service_job: &DEPLOY_SERVICE_JOB
+  cache:
+    directories:
+      - node_modules
+      - ${SERVICE_PATH}/node_modules
+
+  install:
+    - npm install -g serverless
+    - travis_retry npm install
+    - cd ${SERVICE_PATH}
+    - travis_retry npm install
+    - cd -
+
+  script:
+    - cd ${SERVICE_PATH}
+    - serverless deploy -s ${STAGE_NAME}
+    - cd -
+
+environments:
+  - &PRODUCTION_ENV
+    - AWS_ACCESS_KEY_ID=${AWS_ACCESS_KEY_ID_PRODUCTION}
+    - AWS_SECRET_ACCESS_KEY=${AWS_SECRET_ACCESS_KEY_PRODUCTION}
+
+  - &UAT_ENV
+    - AWS_ACCESS_KEY_ID=${AWS_ACCESS_KEY_ID_UAT}
+    - AWS_SECRET_ACCESS_KEY=${AWS_SECRET_ACCESS_KEY_UAT}
+
+  - &DEVELOPMENT_ENV
+    - AWS_ACCESS_KEY_ID=${AWS_ACCESS_KEY_ID_DEVELOPMENT}
+    - AWS_SECRET_ACCESS_KEY=${AWS_SECRET_ACCESS_KEY_DEVELOPMENT}
+
+jobs:
+  include:
+    # develop branch deploys to the 'dev' stage
+    - <<: *DEPLOY_SERVICE_JOB
+      name: "Deploy Users API"
+      if: type = push AND branch = develop
+      env:
+        - SERVICE_PATH="users-api"
+        - STAGE_NAME=dev
+        - *DEVELOPMENT_ENV
+    - <<: *DEPLOY_SERVICE_JOB
+      name: "Deploy Test Experiences API"
+      if: type = push AND branch = develop
+      env:
+        - SERVICE_PATH="todo-api"
+        - STAGE_NAME=dev
+        - *DEVELOPMENT_ENV
+
+    # uat branch deploys to the 'uat' stage
+    - <<: *DEPLOY_SERVICE_JOB
+      name: "Deploy Test Users API"
+      if: type = push AND branch = uat
+      env:
+        - SERVICE_PATH="users-api"
+        - STAGE_NAME=uat
+        - *UAT_ENV
+    - <<: *DEPLOY_SERVICE_JOB
+      name: "Deploy Test Experiences API"
+      if: type = push AND branch = uat
+      env:
+        - SERVICE_PATH="todo-api"
+        - STAGE_NAME=uat
+        - *UAT_ENV
+
+    # master branch deploys to the 'prod' stage
+    - <<: *DEPLOY_SERVICE_JOB
+      name: "Deploy Test Users API"
+      if: type = push AND branch = master
+      env:
+        - SERVICE_PATH="users-api"
+        - STAGE_NAME=prod
+        - *PRODUCTION_ENV
+    - <<: *DEPLOY_SERVICE_JOB
+      name: "Deploy Test Experiences API"
+      if: type = push AND branch = master
+      env:
+        - SERVICE_PATH="todo-api"
+        - STAGE_NAME=prod
+        - *PRODUCTION_ENV
