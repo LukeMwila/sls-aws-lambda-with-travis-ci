@@ -44,7 +44,7 @@ jobs:
         - STAGE_NAME=dev
         - *DEVELOPMENT_ENV
     - <<: *DEPLOY_SERVICE_JOB
-      name: "Deploy Test Experiences API"
+      name: "Deploy To Do API"
       if: type = push AND branch = develop
       env:
         - SERVICE_PATH="todo-api"
@@ -53,14 +53,14 @@ jobs:
 
     # uat branch deploys to the 'uat' stage
     - <<: *DEPLOY_SERVICE_JOB
-      name: "Deploy Test Users API"
+      name: "Deploy Users API"
       if: type = push AND branch = uat
       env:
         - SERVICE_PATH="users-api"
         - STAGE_NAME=uat
         - *UAT_ENV
     - <<: *DEPLOY_SERVICE_JOB
-      name: "Deploy Test Experiences API"
+      name: "Deploy To Do API"
       if: type = push AND branch = uat
       env:
         - SERVICE_PATH="todo-api"
@@ -69,14 +69,14 @@ jobs:
 
     # master branch deploys to the 'prod' stage
     - <<: *DEPLOY_SERVICE_JOB
-      name: "Deploy Test Users API"
+      name: "Deploy Users API"
       if: type = push AND branch = master
       env:
         - SERVICE_PATH="users-api"
         - STAGE_NAME=prod
         - *PRODUCTION_ENV
     - <<: *DEPLOY_SERVICE_JOB
-      name: "Deploy Test Experiences API"
+      name: "Deploy To Do API"
       if: type = push AND branch = master
       env:
         - SERVICE_PATH="todo-api"
